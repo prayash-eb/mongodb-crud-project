@@ -1,0 +1,31 @@
+import { Document, model, Schema, Types } from "mongoose";
+
+export interface IProductCategory {
+    name: string;
+    description: string;
+    parentCategoryId: Types.ObjectId;
+    categoryPath: string;
+    level: number;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+const productCategorySchema = new Schema<IProductCategory>({
+    name: {
+        type: String,
+        required: true
+    },
+    description: String,
+    parentCategoryId: {
+        type: Schema.Types.ObjectId,
+        ref: "Category"
+    },
+    categoryPath: String,
+    level: Number
+}, {
+    timestamps: true
+})
+
+const ProductCategory = model<IProductCategory>("Product_Category", productCategorySchema)
+
+export default ProductCategory
