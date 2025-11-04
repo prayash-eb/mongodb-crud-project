@@ -3,6 +3,8 @@ import Product, { type IProduct } from "../models/product.model.js";
 import ProductCategory, { type IProductCategory } from "../models/category.model.js";
 import ProductDescription, { type IProductDescription } from "../models/product_description.model.js";
 import ProductVariant, { type IProductVariant } from "../models/product_variant.model.js";
+import type { IUserReview } from "../models/review.model.js";
+import UserReview from "../models/review.model.js";
 
 
 export const addProductCategory = async (req: Request, res: Response, next: NextFunction) => {
@@ -17,7 +19,6 @@ export const addProductCategory = async (req: Request, res: Response, next: Next
         res.status(500).json({ error })
     }
 }
-
 
 export const addProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -76,6 +77,20 @@ export const removeProduct = async (req: Request, res: Response, next: NextFunct
         ])
 
         return res.status(201).json({ success: true })
+    } catch (error: any) {
+        console.log(error);
+        res.status(500).json({ error })
+    }
+}
+
+export const addProductReview = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+
+        const reviewData = req.body as IUserReview
+        const review = await UserReview.create({
+            ...reviewData
+        })
+        return res.json({ success: true, review })
     } catch (error: any) {
         console.log(error);
         res.status(500).json({ error })

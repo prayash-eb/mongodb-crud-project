@@ -48,7 +48,6 @@ export const userLogin = async (req: Request, res: Response, next: NextFunction)
     }
 }
 
-
 export const addUserAddress = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userAddressData = req.body as IUserAddress;
@@ -64,8 +63,7 @@ export const addUserAddress = async (req: Request, res: Response, next: NextFunc
     }
 }
 
-
-export const addUserCart = async (req: Request, res: Response, next: NextFunction) => {
+export const addToCart = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = req.user?.id;
         const { productId, quantity } = req.body;
@@ -115,17 +113,59 @@ export const addUserCart = async (req: Request, res: Response, next: NextFunctio
     }
 };
 
-
-export const addUserReview = async (req: Request, res: Response, next: NextFunction) => {
+export const removeFromCart = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        const userId = req.user?.id;
+        const { productId, quantity } = req.body;
 
-        const reviewData = req.body as IUserReview
-        const review = await UserReview.create({
-            ...reviewData
-        })
-        return res.json({ success: true, review })
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        if (!quantity || quantity <= 0) {
+            return res.status(400).json({ message: "Quantity must be greater than 0" });
+        }
+
+        const cart = await UserCart.findOne({ userId });
+        if (!cart) {
+            return res.status(404).json({ message: "Cart not found" });
+        }
+
+        const itemIndex = cart.items.findIndex(
+            (item) => item.productId.toString() === productId
+        );
+
+        if (itemIndex === -1) {
+            return res.status(404).json({ message: "Item not found in cart" });
+        }
+
+        const item = cart.items[itemIndex]!;
+    
+
+        if (item.quantity > quantity) {
+            // decrease the quantity
+            item.quantity -= quantity;
+        } else {
+            // remove item if quantity reaches 0 or less
+            cart.items.splice(itemIndex, 1);
+        }
+
+        // if cart becomes empty, you could delete it (optional)
+        if (cart.items.length === 0) {
+            await UserCart.deleteOne({ _id: cart._id });
+            return res.status(200).json({ success: true, message: "Cart is now empty and removed" });
+        }
+
+        await cart.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Item removed successfully",
+            cart
+        });
     } catch (error: any) {
-        console.log(error);
-        res.status(500).json({ error })
+        console.error(error);
+        return res.status(500).json({ message: "Server error", error: error.message });
     }
-}
+};
+
