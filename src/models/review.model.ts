@@ -1,6 +1,7 @@
 import mongoose, { Document, model, Schema, Types } from "mongoose";
+import Product from "./product.model.js";
 
-export interface IUserReview {
+export interface IProductReview extends Document {
     userId: Types.ObjectId;
     productId: Types.ObjectId;
     ratingScore: number;
@@ -10,7 +11,7 @@ export interface IUserReview {
     updatedAt: Date;
 }
 
-const userReviewSchema = new Schema<IUserReview>({
+const productReviewSchema = new Schema<IProductReview>({
     userId: {
         type: Schema.Types.ObjectId,
         required: true,
@@ -30,6 +31,32 @@ const userReviewSchema = new Schema<IUserReview>({
     timestamps: true
 })
 
-const UserReview = model<IUserReview>("User_Review", userReviewSchema);
+productReviewSchema.post("save", async function (doc) {
+    const productId = doc.productId;
+    const product = await Product.findById(productId);
+    if (!product) return;
+    product.totalReviews = (product.totalReviews || 0) + 1;
+    product.averageRating = ((product.averageRating || 0) * (product.totalReviews - 1) + doc.ratingScore) / product.totalReviews;
+    await product.save();
+});
 
-export default UserReview;
+productReviewSchema.post("deleteOne", async function (doc) {
+    const productId = doc.productId;
+    const product = await Product.findById(productId);
+    if (!product) return;
+
+    // Decrease totalReviews count
+    product.totalReviews = Math.max(0, (product.totalReviews || 0) - 1);
+
+    // Recalculate averageRating
+    const reviews = await ProductReview.find({ productId: product._id });
+    const totalRating = reviews.reduce((sum, review) => sum + review.ratingScore, 0);
+    product.averageRating = reviews.length ? totalRating / reviews.length : 0;
+
+    await product.save();
+});
+
+
+const ProductReview = model<IProductReview>("Product_Review", productReviewSchema);
+
+export default ProductReview;

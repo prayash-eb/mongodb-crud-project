@@ -37,5 +37,5 @@ const userCartSchema = new Schema<IUserCart>({
 
 userCartSchema.index({ userId: 1 })
 
-const UserCart = model<IUserCart>("User_Cart", userCartSchema)
-export default UserCart;
+const Cart = model<IUserCart>("Cart", userCartSchema)
+export default Cart;

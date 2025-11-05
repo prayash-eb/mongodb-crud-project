@@ -3,8 +3,6 @@ import User, { type IUser, type IUserAddress } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken"
 import UserCart from "../models/cart.model.js";
-import type { IUserReview } from "../models/review.model.js";
-import UserReview from "../models/review.model.js";
 
 export const userRegister = async (req: Request, res: Response, next: NextFunction) => {
     try {

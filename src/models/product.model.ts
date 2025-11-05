@@ -2,8 +2,9 @@ import mongoose, { Document, model, Schema, Types } from "mongoose";
 
 interface IProductReview {
     userId: Types.ObjectId,
+    reviewId: Types.ObjectId,
     ratingScore: number;
-    comment: number;
+    comment: string;
     createdAt: Date;
 }
 
@@ -15,6 +16,8 @@ export interface IProduct extends Document {
     discountPercentage?: number;
     thumbnail: string;
     shortDescription?: string;
+    descriptionId: Types.ObjectId;
+    variants: Types.ObjectId[];
     totalReviews: number;
     averageRating: number;
     totalStockCount: number;
@@ -38,8 +41,6 @@ const recentReviewSchema = new Schema<IProductReview>({
         type: Date,
         default: Date.now
     }
-}, {
-    _id: false
 })
 
 const productSchema = new Schema<IProduct>({
@@ -57,6 +58,11 @@ const productSchema = new Schema<IProduct>({
         type: Number,
         required: true
     },
+    descriptionId: {
+        type: Schema.Types.ObjectId,
+        ref: "Product_Description"
+    },
+    variants: [{ type: Schema.Types.ObjectId, ref: "Product_Variant" }],
     brand: String,
     discountPercentage: Number,
     thumbnail: String,

@@ -26,7 +26,6 @@ interface IUserOrder extends Document {
     updatedAt: Date;
 }
 
-
 const orderItemsSchema = new Schema<IOrderItems>({
     productId: {
         type: Schema.Types.ObjectId,
@@ -40,7 +39,6 @@ const orderItemsSchema = new Schema<IOrderItems>({
     discountAtPurchase: Number,
 
 })
-
 
 const orderSchema = new Schema<IUserOrder>({
     userId: {

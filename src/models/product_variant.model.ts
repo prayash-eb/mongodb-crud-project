@@ -2,11 +2,11 @@ import { Document, model, Schema, Types, type Date } from "mongoose";
 
 export interface IProductVariant extends Document{
     productId: Types.ObjectId;
-    color: string;
-    size: string;
+    color?: string;
+    size?: string;
     price: number;
     stockCount: number;
-    images: string[];
+    images?: string[];
     createdAt: Date,
     updatedAt: Date
 }

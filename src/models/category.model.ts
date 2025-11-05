@@ -1,6 +1,6 @@
 import { Document, model, Schema, Types } from "mongoose";
 
-export interface IProductCategory {
+export interface IProductCategory extends Document {
     name: string;
     description: string;
     parentCategoryId: Types.ObjectId;
@@ -20,7 +20,11 @@ const productCategorySchema = new Schema<IProductCategory>({
         type: Schema.Types.ObjectId,
         ref: "Category"
     },
-    categoryPath: String,
+    categoryPath: {
+        type: String,
+        trim: true,
+        lowercase: true
+    },
     level: Number
 }, {
     timestamps: true
