@@ -1,6 +1,6 @@
 import { Document, model, Schema, Types, type Date } from "mongoose";
 
-export interface IProductVariant extends Document{
+export interface IProductVariant extends Document {
     productId: Types.ObjectId;
     color?: string;
     size?: string;
@@ -28,6 +28,13 @@ const productVariantSchema = new Schema<IProductVariant>({
 }, {
     timestamps: true
 })
+
+productVariantSchema.post("save", async ()=> {
+    
+})
+
+
+productVariantSchema.index({ productId: 1 });
 
 const ProductVariant = model<IProductVariant>("Product_Variant", productVariantSchema)
 export default ProductVariant

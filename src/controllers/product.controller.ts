@@ -162,7 +162,7 @@ export const deleteProductDescription = async (req: Request, res: Response, next
             productId
         })
         if (!deletedDescription) {
-            res.status(404).json({ message: "Description not found or error while deletinf description" })
+            return res.status(404).json({ message: "Description not found or error while deletinf description" })
         }
         await Product.findByIdAndUpdate(productId, {
             $unset: {
@@ -200,7 +200,6 @@ export const editProductDescription = async (req: Request, res: Response, next: 
     }
 }
 
-
 export const addProductVariant = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const productVariantData = req.body as IProductVariant;
@@ -208,7 +207,7 @@ export const addProductVariant = async (req: Request, res: Response, next: NextF
             ...productVariantData
         })
         await Product.findByIdAndUpdate(productVariantData.productId, {
-            $push: {
+            $addToSet: {
                 variants: productVariant._id
             }
         })
@@ -221,22 +220,32 @@ export const addProductVariant = async (req: Request, res: Response, next: NextF
 export const getProductVariants = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { productId } = req.params;
-        const variants = await Product.findById(productId).populate("variants").select({ variants: 1 })
+        const variants = await ProductVariant.find({
+            productId
+        })
         return res.status(200).json({ success: true, variants })
     } catch (error: any) {
         console.log(error);
         res.status(500).json({ error })
     }
 }
-export const updateProductVariants = async (req: Request, res: Response, next: NextFunction) => {
+export const updateProductVariant = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { productId } = req.params
+        const { variantId } = req.body
         const productVariantData = req.body as IProductVariant
         const updatedVariant = await ProductVariant.findOneAndUpdate({
+            _id: variantId,
             productId
         }, {
             ...productVariantData
+        }, {
+            new: true
         })
+
+        if (!updatedVariant) {
+            return res.status(404).json({ message: "Variant not found or error while updating variant" })
+        }
 
         return res.json({
             success: true,
@@ -284,13 +293,13 @@ export const deleteProductVariant = async (req: Request, res: Response, next: Ne
     }
 }
 
-
 export const addProductReview = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        const userId = req.user?.id
         const reviewData = req.body as IProductReview;
 
         // 1. Create the review
-        const review = await ProductReview.create({ ...reviewData });
+        const review = await ProductReview.create({ ...reviewData, userId });
 
         // 2. Add review to product's topReviews array
         const product = await Product.findById(reviewData.productId);
@@ -332,7 +341,7 @@ export const addProductReview = async (req: Request, res: Response, next: NextFu
 export const getProductReviews = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const { productId } = req.params;
-        const reviews = await ProductReview.find({ productId })
+        const reviews = await ProductReview.find({ productId }).sort({ createdAt: -1 })
         return res.json({ success: true, reviews });
     } catch (error: any) {
         console.log(error);
@@ -341,10 +350,10 @@ export const getProductReviews = async (req: Request, res: Response, next: NextF
 }
 export const deleteProductReview = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const userId = req.user?.id;
         const { reviewId } = req.params;
 
-        const deletedReview = await ProductReview.findOneAndDelete({ _id: reviewId, userId });
+        const deletedReview = await ProductReview.findOneAndDelete({ _id: reviewId});
+
         if (!deletedReview) {
             return res.status(404).json({ success: false, message: "Review not found or unauthorized" });
         }

@@ -75,7 +75,6 @@ export const getSingleCategory = async (req: Request, res: Response, next: NextF
     }
 }
 
-
 // Recursive function to delete category and all nested children
 const deleteCategoryAndChildren = async (categoryId: Types.ObjectId | string) => {
     // Find all immediate children of this category

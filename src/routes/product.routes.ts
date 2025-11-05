@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addProduct, addProductDescription, addProductReview, addProductVariant, deleteProductDescription, deleteProductReview, deleteProductVariant, editProduct, editProductDescription, getProductDescription, getProductReviews, getProducts, getProductVariants, getSingleProduct, removeProduct } from "../controllers/product.controller.js";
+import { addProduct, addProductDescription, addProductReview, addProductVariant, deleteProductDescription, deleteProductReview, deleteProductVariant, editProduct, editProductDescription, getProductDescription, getProductReviews, getProducts, getProductVariants, getSingleProduct, removeProduct, updateProductVariant } from "../controllers/product.controller.js";
 import { requireAuthentication } from "../middleware/auth.middleware.js";
 
 const productRouter = Router()
@@ -16,11 +16,12 @@ productRouter.delete("/remove-details/:productId", deleteProductDescription)
 productRouter.patch("/update-details/:productId", editProductDescription)
 
 productRouter.post("/add-variant", addProductVariant)
-productRouter.get("/get-variants", getProductVariants)
-productRouter.delete("/remove-variant", deleteProductVariant)
+productRouter.get("/get-variants/:productId", getProductVariants)
+productRouter.patch("/update-variant/:productId", updateProductVariant)
+productRouter.delete("/remove-variant/:productId", deleteProductVariant)
 
 productRouter.post("/add-review", requireAuthentication, addProductReview)
-productRouter.get("/reviews", getProductReviews)
+productRouter.get("/reviews/:productId", getProductReviews)
 productRouter.delete("/remove-review/:reviewId", deleteProductReview)
 
 
