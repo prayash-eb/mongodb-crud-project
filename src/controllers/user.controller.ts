@@ -2,7 +2,6 @@ import type { Request, Response, NextFunction } from "express";
 import User, { type IUser, type IUserAddress } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken"
-import UserCart from "../models/cart.model.js";
 
 export const userRegister = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -46,7 +45,7 @@ export const userLogin = async (req: Request, res: Response, next: NextFunction)
     }
 }
 
-export const addUserAddress = async (req: Request, res: Response, next: NextFunction) => {
+export const addAddress = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userAddressData = req.body as IUserAddress;
         const newUser = await User.findByIdAndUpdate(req.user?.id, {
@@ -61,109 +60,81 @@ export const addUserAddress = async (req: Request, res: Response, next: NextFunc
     }
 }
 
-export const addToCart = async (req: Request, res: Response, next: NextFunction) => {
+export const removeAddress = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = req.user?.id;
-        const { productId, quantity } = req.body;
+        const { addressId } = req.body;
 
-        if (!userId) {
-            return res.status(401).json({ message: "Unauthorized" });
-        }
-
-        if (!quantity || quantity <= 0) {
-            return res.status(400).json({ message: "Quantity must be greater than 0" });
-        }
-
-        // find the user's cart
-        let cart = await UserCart.findOne({ userId });
-
-        if (!cart) {
-            // create a new cart
-            cart = new UserCart({
-                userId,
-                items: [{ productId, quantity }]
-            });
-        } else {
-            // check if product already exists in cart
-            const existingItem = cart.items.find(
-                (item) => item.productId.toString() === productId
-            );
-
-            if (existingItem) {
-                // increment quantity
-                existingItem.quantity += quantity;
-            } else {
-                // add as new item
-                cart.items.push({ productId, quantity });
-            }
-        }
-
-        await cart.save();
-
-        return res.status(200).json({
-            success: true,
-            message: "Cart updated successfully",
-            cart
-        });
-    } catch (error: any) {
-        console.error(error);
-        return res.status(500).json({ message: "Server error", error: error.message });
-    }
-};
-
-export const removeFromCart = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const userId = req.user?.id;
-        const { productId, quantity } = req.body;
-
-        if (!userId) {
-            return res.status(401).json({ message: "Unauthorized" });
-        }
-
-        if (!quantity || quantity <= 0) {
-            return res.status(400).json({ message: "Quantity must be greater than 0" });
-        }
-
-        const cart = await UserCart.findOne({ userId });
-        if (!cart) {
-            return res.status(404).json({ message: "Cart not found" });
-        }
-
-        const itemIndex = cart.items.findIndex(
-            (item) => item.productId.toString() === productId
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { $pull: { addresses: { _id: addressId } } },
+            { new: true } // return the updated document
         );
 
-        if (itemIndex === -1) {
-            return res.status(404).json({ message: "Item not found in cart" });
+        if (!updatedUser) {
+            return res.status(404).json({ error: "User not found or error while updating addresses" });
         }
-
-        const item = cart.items[itemIndex]!;
-    
-
-        if (item.quantity > quantity) {
-            // decrease the quantity
-            item.quantity -= quantity;
-        } else {
-            // remove item if quantity reaches 0 or less
-            cart.items.splice(itemIndex, 1);
-        }
-
-        // if cart becomes empty, you could delete it (optional)
-        if (cart.items.length === 0) {
-            await UserCart.deleteOne({ _id: cart._id });
-            return res.status(200).json({ success: true, message: "Cart is now empty and removed" });
-        }
-
-        await cart.save();
 
         return res.status(200).json({
             success: true,
-            message: "Item removed successfully",
-            cart
+            addresses: updatedUser.addresses
         });
     } catch (error: any) {
         console.error(error);
-        return res.status(500).json({ message: "Server error", error: error.message });
+        res.status(500).json({ error: "Something went wrong" });
     }
 };
 
+export const getAddresses = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.id!;
+        const user = await User.findById(userId)
+        return res.status(200).json({
+            success: true,
+            addresses: user?.addresses
+        });
+    } catch (error: any) {
+        console.error(error);
+        res.status(500).json({ error: "Something went wrong" });
+    }
+};
+
+export const getProfile = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const user = await User.findById(req.user?.id!);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" })
+        }
+        return res.status(200).json({ success: true, user })
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error });
+    }
+}
+
+export const updateProfile = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { name, email, phoneNo } = req.body;
+        const user = await User.findById(req.user?.id!);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" })
+        }
+        if (name) {
+            user.name = name;
+        }
+        if (email) {
+            user.email = email;
+            user.isEmailVerified = false;
+        }
+        if (phoneNo) {
+            user.phoneNo = phoneNo
+        }
+        await user.save();
+
+        res.status(200).json({ success: true, user })
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ error });
+    }
+}

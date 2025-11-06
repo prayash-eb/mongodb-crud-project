@@ -9,17 +9,19 @@ interface IUserCartItems {
 interface IUserCart extends Document {
     userId: Types.ObjectId;
     items: IUserCartItems[]
+    totalItems: number;
     createdAt: Date,
     updatedAt: Date
 }
 
 const userCartItemsSchema = new Schema<IUserCartItems>({
     productId: {
-        type:Schema.Types.ObjectId,
-        ref:"Product"
+        type: Schema.Types.ObjectId,
+        ref: "Product"
     },
     quantity: Number,
     addedAt: {
+
         type: Date,
         default: Date.now
     }
@@ -29,12 +31,16 @@ const userCartSchema = new Schema<IUserCart>({
     userId: {
         type: Schema.Types.ObjectId,
         required: true,
-        ref:"User"
+        ref: "User"
     },
     items: {
         type: [userCartItemsSchema],
         required: true
-    }
+    },
+    totalItems: {
+        type: Number,
+        default: 0
+    },
 }, {
     timestamps: true
 })

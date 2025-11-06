@@ -28,6 +28,8 @@ export const addToCart = async (req: Request, res: Response, next: NextFunction)
             cart.items.push({ productId, quantity });
         }
 
+        cart.totalItems = cart.items.length
+
         await cart.save();
         return res.status(200).json({ success: true, cart });
     } catch (error) {
@@ -45,6 +47,7 @@ export const removeFromCart = async (req: Request, res: Response, next: NextFunc
         if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
 
         cart.items = cart.items.filter(item => item.productId.toString() !== productId);
+        cart.totalItems = cart.items.length
         await cart.save();
 
         return res.status(200).json({ success: true, cart });
@@ -83,6 +86,7 @@ export const clearCart = async (req: Request, res: Response, next: NextFunction)
         if (!cart) return res.status(404).json({ success: false, message: "Cart not found" });
 
         cart.items = [];
+        cart.totalItems = 0;
         await cart.save();
 
         return res.status(200).json({ success: true, message: "Cart cleared successfully", cart });

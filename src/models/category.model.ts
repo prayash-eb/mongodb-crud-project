@@ -30,6 +30,8 @@ const productCategorySchema = new Schema<IProductCategory>({
     timestamps: true
 })
 
+productCategorySchema.index({ parentCategoryId: 1 })
+
 const ProductCategory = model<IProductCategory>("Product_Category", productCategorySchema)
 
 export default ProductCategory

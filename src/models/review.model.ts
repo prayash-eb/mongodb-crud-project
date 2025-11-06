@@ -56,6 +56,7 @@ productReviewSchema.post("deleteOne", async function (doc) {
     await product.save();
 });
 
+productReviewSchema.index({ productId: 1 })
 
 const ProductReview = model<IProductReview>("Product_Review", productReviewSchema);
 
