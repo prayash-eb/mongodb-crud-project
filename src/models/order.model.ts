@@ -2,7 +2,8 @@ import { Document, model, Schema, Types } from "mongoose";
 
 interface IOrderItems {
     productId: Types.ObjectId;
-    priceAtPurchase: number;
+    unitPriceAtPurchase: number;
+    unitPriceAfterDiscount: number;
     discountAtPurchase?: number;
     quantity: number;
 }
@@ -15,7 +16,7 @@ interface IOrderShippingAddress {
     postalCode: string
 
 }
-interface IUserOrder extends Document {
+export interface IUserOrder extends Document {
     userId: Types.ObjectId;
     items: IOrderItems[];
     totalAmount: number;
@@ -32,12 +33,21 @@ const orderItemsSchema = new Schema<IOrderItems>({
         required: true,
         ref: "Product"
     },
-    priceAtPurchase: {
+    unitPriceAtPurchase: {
         type: Number,
         required: true
     },
-    discountAtPurchase: Number,
-
+    discountAtPurchase: {
+        type: Number,
+        default: 0
+    },
+    unitPriceAfterDiscount: {
+        type: Number
+    },
+    quantity: {
+        type: Number,
+        default: 1
+    }
 })
 
 const orderSchema = new Schema<IUserOrder>({

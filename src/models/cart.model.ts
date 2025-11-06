@@ -14,18 +14,22 @@ interface IUserCart extends Document {
 }
 
 const userCartItemsSchema = new Schema<IUserCartItems>({
-    productId: Types.ObjectId,
+    productId: {
+        type:Schema.Types.ObjectId,
+        ref:"Product"
+    },
     quantity: Number,
     addedAt: {
         type: Date,
         default: Date.now
     }
-})
+}, { _id: false })
 
 const userCartSchema = new Schema<IUserCart>({
     userId: {
         type: Schema.Types.ObjectId,
-        required: true
+        required: true,
+        ref:"User"
     },
     items: {
         type: [userCartItemsSchema],

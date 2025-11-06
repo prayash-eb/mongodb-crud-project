@@ -6,6 +6,8 @@ import connectDB from "./config/database.js";
 import userRouter from "./routes/user.routes.js";
 import productRouter from "./routes/product.routes.js";
 import categoryRouter from "./routes/category.route.js";
+import orderRouter from "./routes/order.route.js";
+import cartRouter from "./routes/cart.routes.js";
 
 const PORT = process.env.PORT || 3000
 
@@ -17,6 +19,8 @@ app.use(express.json())
 app.use("/user", userRouter)
 app.use("/product", productRouter)
 app.use("/category", categoryRouter)
+app.use("/order", orderRouter)
+app.use("/cart", cartRouter)
 
 
 app.get("/", (req: Request, res: Response) => {

@@ -66,8 +66,8 @@ export const addCategory = async (req: Request, res: Response, next: NextFunctio
 
 export const getSingleCategory = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { id } = req.params;
-        const category = await ProductCategory.findById(id);
+        const { categoryId } = req.params;
+        const category = await ProductCategory.findById(categoryId);
         res.json({ success: true, category })
     } catch (error) {
         console.log(error);
@@ -89,9 +89,9 @@ const deleteCategoryAndChildren = async (categoryId: Types.ObjectId | string) =>
 
 export const deleteCategory = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { id } = req.params;
-        await deleteCategoryAndChildren(id!);
-        return res.json({ success: true, deletedId: id })
+        const { categoryId } = req.params;
+        await deleteCategoryAndChildren(categoryId!);
+        return res.json({ success: true, deletedId: categoryId })
     } catch (error: any) {
         console.log(error);
         res.status(500).json({ error })

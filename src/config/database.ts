@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 export default async function connectDB() {
     try {
-        const DB_URL = process.env.DATABASE_URL;
+        const DB_URL = process.env.DATABASE_URL_REMOTE!;
         if (!DB_URL) {
             console.log("Please configure database URL");
             process.exit(1)
@@ -10,7 +10,7 @@ export default async function connectDB() {
         mongoose.connection.on("connected", () => {
             console.log("Database Connected");
         })
-        mongoose.connect(process.env.DATABASE_URL!,{
+        mongoose.connect(DB_URL,{
             dbName:"db_project"
         })
     } catch (error) {
