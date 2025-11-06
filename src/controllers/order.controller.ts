@@ -3,7 +3,6 @@ import Order from "../models/order.model.js";
 import Product from "../models/product.model.js";
 import type { Types } from "mongoose";
 
-
 export const createOrder = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = req.user?.id;

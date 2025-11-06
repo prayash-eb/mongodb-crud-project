@@ -6,9 +6,9 @@ const productRouter = Router()
 
 productRouter.get("/", getProducts)
 productRouter.get("/:productId", getSingleProduct)
-productRouter.post("/add", addProduct)
-productRouter.patch("/update/:productId", editProduct)
-productRouter.delete("/remove/:productId", removeProduct)
+productRouter.post("/", addProduct)
+productRouter.patch("/:productId", editProduct)
+productRouter.delete("/:productId", removeProduct)
 
 productRouter.post("/add-details", addProductDescription)
 productRouter.get("/get-details/:productId", getProductDescription)

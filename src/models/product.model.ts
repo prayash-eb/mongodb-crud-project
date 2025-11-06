@@ -32,6 +32,11 @@ const recentReviewSchema = new Schema<IProductReview>({
         required: true,
         ref: "User"
     },
+    reviewId: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref: "Product_Review"
+    },
     ratingScore: {
         type: Number,
         required: true
@@ -77,6 +82,7 @@ const productSchema = new Schema<IProduct>({
     },
     totalStockCount: {
         type: Number,
+        default: 0
     },
     recentReviews: {
         type: [recentReviewSchema],

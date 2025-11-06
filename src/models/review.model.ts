@@ -40,20 +40,26 @@ productReviewSchema.post("save", async function (doc) {
     await product.save();
 });
 
-productReviewSchema.post("deleteOne", async function (doc) {
-    const productId = doc.productId;
-    const product = await Product.findById(productId);
-    if (!product) return;
+productReviewSchema.post("findOneAndDelete", async function (doc) {
 
-    // Decrease totalReviews count
-    product.totalReviews = Math.max(0, (product.totalReviews || 0) - 1);
+    try {
+        const productId = doc.productId;
+        const product = await Product.findById(productId);
+        if (!product) return;
 
-    // Recalculate averageRating
-    const reviews = await ProductReview.find({ productId: product._id });
-    const totalRating = reviews.reduce((sum, review) => sum + review.ratingScore, 0);
-    product.averageRating = reviews.length ? totalRating / reviews.length : 0;
+        // Decrease totalReviews count
+        product.totalReviews = Math.max(0, (product.totalReviews || 0) - 1);
 
-    await product.save();
+        // Recalculate averageRating
+        const reviews = await ProductReview.find({ productId: product._id });
+        const totalRating = reviews.reduce((sum, review) => sum + review.ratingScore, 0);
+        product.averageRating = reviews.length ? totalRating / reviews.length : 0;
+
+        await product.save();
+    } catch (error) {
+        console.log(error);
+    }
+
 });
 
 productReviewSchema.index({ productId: 1 })

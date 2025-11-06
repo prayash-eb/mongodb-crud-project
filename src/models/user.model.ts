@@ -47,8 +47,7 @@ const userAddressSchema = new Schema<IUserAddress>({
     city: { type: String, trim: true },
     country: { type: String, trim: true },
     postalCode: { type: String, trim: true },
-}
-)
+})
 
 const userSchema = new Schema<IUser>({
     name: {

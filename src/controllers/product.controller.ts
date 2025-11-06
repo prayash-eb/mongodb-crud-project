@@ -98,7 +98,7 @@ export const editProduct = async (req: Request, res: Response, next: NextFunctio
 }
 export const removeProduct = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { productId } = req.body;
+        const { productId } = req.params;
         const product = await Product.findById(productId)
         if (!product) {
             return res.status(404).json({ message: "Product not found" })
@@ -120,13 +120,14 @@ export const removeProduct = async (req: Request, res: Response, next: NextFunct
     }
 }
 
-
 export const addProductDescription = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        const { productId } = req.body;
+
         const productDescriptionData = req.body as IProductDescription;
-        const productDescription = await ProductDescription.create({
+        const productDescription = await ProductDescription.findOneAndUpdate({ productId }, {
             ...productDescriptionData
-        })
+        }, { upsert: true, new: true })
         await Product.findByIdAndUpdate(productDescriptionData.productId, {
             $set: {
                 descriptionId: productDescription._id
@@ -180,6 +181,7 @@ export const editProductDescription = async (req: Request, res: Response, next: 
         const { productId } = req.params;
         const productDescriptionData = req.body as IProductDescription;
         const product = await Product.findById(productId);
+        console.log(product);
         if (!product) {
             return res.status(404).json({ message: "Product not found" })
         }
@@ -188,7 +190,6 @@ export const editProductDescription = async (req: Request, res: Response, next: 
         }, {
             ...productDescriptionData
         }, {
-            upsert: true,
             new: true,
             runValidators: true
         })
@@ -298,6 +299,14 @@ export const addProductReview = async (req: Request, res: Response, next: NextFu
         const userId = req.user?.id
         const reviewData = req.body as IProductReview;
 
+        const alreadyReviewed = await ProductReview.findOne({
+            productId: reviewData.productId,
+            userId
+        })
+
+        if (alreadyReviewed) {
+            return res.status(409).json({ message: "Already Reviewed the product" })
+        }
         // 1. Create the review
         const review = await ProductReview.create({ ...reviewData, userId });
 
@@ -352,7 +361,7 @@ export const deleteProductReview = async (req: Request, res: Response, next: Nex
     try {
         const { reviewId } = req.params;
 
-        const deletedReview = await ProductReview.findOneAndDelete({ _id: reviewId});
+        const deletedReview = await ProductReview.findOneAndDelete({ _id: reviewId });
 
         if (!deletedReview) {
             return res.status(404).json({ success: false, message: "Review not found or unauthorized" });

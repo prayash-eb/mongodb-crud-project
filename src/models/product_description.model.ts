@@ -22,10 +22,13 @@ const prodouctDescriptionSchema = new Schema<IProductDescription>({
         type: [Schema.Types.Mixed], // allows to store array of key:value pairs
         default: []
     },
+    longDescription:String,
     warrantyPeriodInYears: Number,
     warrantyDetails: String,
     returnPolicy: String
 }, { timestamps: true });
+
+prodouctDescriptionSchema.index({ productId: 1 })
 
 
 const ProductDescription = model<IProductDescription>("Product_Description", prodouctDescriptionSchema);
